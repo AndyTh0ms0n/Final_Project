@@ -1,49 +1,343 @@
 ---
-title: Project title
-author: by Team name
-output: html_document
+title: "Titanic Death Rates"
+subtitle:
+author: "Cade, Zety, Kristen and Andrew"
+institute: "University of Edinburgh"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    css: xaringan-themer.css
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
 ---
 
-## Research Question
-
-Describe your research question here. Include why this question might be of interest. 
-
-## Data
-
-Briefly describe your dataset here - include a description of the key variables you will be investigating. 
-Include a citation for your data. 
-See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on proper citation for datasets. 
-If you got your data off the web, make sure to note the retrieval date.
-
-## Findings
-
-The write-up of your project and findings go here. 
-
-Think of this as the text of your presentation with some extra detail to cover what there was not time to discuss in the presentation. This might include any assumptions you made when doing your analysis, any limitations of the work you have done or any ideas you have for future work. Feel free to split this section into subsections to make it easier to read. 
-
-The length should be roughly 1,500 words. 
-If you want to use a word count addin, you can install this by copying and pasting the following into RStudio:
-
-`devtools::install_github("benmarwick/wordcountaddin", type = "source", dependencies = TRUE)`
-
-You will then need to restart RStudio. Once you have done that, select the text you want to count the words of, go to Addins, and select the `Word count` addin.
-This addin counts words using two different algorithms, but the results should be similar and as long as you're in the ballpark of 1,500 words, you're good! 
-The addin will ignore code chunks and only count the words in prose. If you don't want to use the addin you can always copy and paste the text into Microsoft Word to do a Word Count!
-
-You can also load your data here and present any analysis results / plots.
-Make sure to hide your code with  `echo = FALSE` unless the point you are trying to make is about the code itself, in which case you should show your code.
-
-
-```{r load-data, echo = FALSE}
-# load data here, if you like
+```{r load-packages, include = FALSE}
+# Add any additional packages you need to this chunk
+library(tidyverse)
+library(palmerpenguins)
+library(knitr)
+library(xaringanthemer)
+library(tidymodels)
 ```
 
-## Presentation
+```{r setup, include=FALSE}
+# For better figure resolution
+knitr::opts_chunk$set(fig.retina = 3, dpi = 300, fig.width = 6, fig.asp = 0.618, out.width = "80%")
+```
 
-Our presentation can be found [here](presentation/presentation.html).
+---
+
+#Hypothesis
+
+While there was some element of luck involved in surviving, it seems some groups of people were more likely to survive than others. We believe that females, passengers with a higher class and young passengers were more likely to survive the Titanic shipwreck. Therefore, we expect to see a link between these variables and the variable “Survived”. We believe that young passengers, passengers with a higher class and females would be more likely to survive as we think they’d get priority when boarding lifeboats while young passengers would also be able to withstand the harsh conditions better due to being fitter. We also believe that passengers with higher class would be staying in a more refined part of the ship built with a better structure.
+
+---
+#Our Data
+
+Within the dataset, titanic, some variables are useless such as "Cabin" and "Ticket" as these variables produce no important information that can be analaysed. They can not be summarised or made into a useful visualisation.
+
+Variables such as "Age", "Pclass", "Sex", "Survived" and Fare are the most useful variables as they can be used in both an analytical and predictive way. These variables can be used to identify trends while they can also provide more relevant insights by visualising, transforming and modelling the data. In the dataset, there are numerous missing values such as "Age". This could be due to the failure in observations or that the ages simply where never known.
+
+Through analysing the dataset as a whole and its variables individually, we will gain a better insight of the data through understanding relationships between variables. From quick glance, it is already evident that the passengers who survived where based on their sex, age and class. This will be further explored throughout the presentation.
+
+---
+
+```{r}
+titanic <- read_csv("C:/Users/andre/Desktop/project_template/data/presentation_files/Datasets/titanic.csv")
+
+my_data <- as_tibble(titanic)
+my_data
+```
 
 
-## References
+---
 
-List any references here. You should, at a minimum, list your data source.
+---
+
+```{r}
+my_data %>%
+  summarise(median_fare = median(Fare, na.rm = TRUE))
+```
+
+```{r}
+my_data %>%
+  summarise(median_Pclass = median(Pclass, na.rm = TRUE))
+```
+
+```{r}
+my_data %>%
+  summarise(median_age = median(Age, na.rm = TRUE))
+```
+
+---
+
+class: middle
+
+Through using summary statistics, the dataset is summarised and information is provided. It outlines something about the values in the dataset such as the mean of specific variables (as shown above).
+
+It simplifies the data in order to quickly identify the information needed while also allowing us to identify what looks 'normal' and what doesn't. This outlines potential anomalies. The summary statistics are filled with information and insights extracted from the table.
+
+---
+
+```{r}
+titanic %>%
+group_by(Pclass, Survived) %>%
+  summarise(
+    n = n())
+```
+
+Among the passengers there were 491 third class passengers, 216 first class passengers and 184 second class passengers.
+We discovered that only 24.2% (rounded) of third-class passengers survived, 63% of first class passengers survived and 47.3% of second class passengers survived.
+This therefore tells us that first class passengers had a higher survival rate than any other class.
+
+---
+
+```{r}
+#Number of NA values in Age
+sum(is.na(titanic$Age))
+
+#Max Age with NAs
+max(titanic$Age)
+
+#Min Age with NAs
+min(titanic$Age)
+```
+
+It was discovered that there were 177 NA values in Age which would therefore give a min and max age value of NA.
+
+---
+
+```{r}
+#NAs removed
+titanic2 <- na.omit(titanic)
+
+#Max Age without NAs
+max(titanic2$Age)
+
+#Min Age without NAs
+min(titanic2$Age)
+```
+
+Therefore, we removed the NA values in order to discover that the maximum age for passengers was 80 and the minimum age was 0.92/1.
+
+---
+
+```{r}
+#Max Fare without NAs
+max(titanic$Fare)
+
+#Min Fare without NAs
+min(titanic$Fare)
+```
+
+Calculating the maximum and minimum fare gave us a maximum of 512 and a minimum of 0.
+
+---
+
+```{r}
+Survived <- table(titanic$Survived, titanic$Sex)
+Survived
+```
+
+Among the passengers there were 314 female passengers and 577 male passengers.
+We discovered that 74.2% (rounded) of female passengers survived while only 18.9% of male passengers survived.
+This statistic therefore allows us to determine that female passengers had a higher survival rate than males.
+
+---
+
+```{r}
+titanic %>% mutate(Fare = cut(Fare, c(0, 10, 20, 30, Inf), labels = c("$0-$10", "$10-$20", "$20-$30", "$30+"))) %>%
+  group_by(Fare, Survived) %>%
+  summarise(n=n())
+```
+
+It was discovered that the higher the fare was, the higher the chance of survival.
+We discovered that only 20% (rounded) of lower fare passengers survived while 58% of higher fare passengers survived.
+This statistic therefore allows us to determine that first class passengers had a higher survival rate than any other class which links back to earlier discoveries.
+
+---
+
+
+## One of our Findings
+
+```{r out.width = "50%", echo=FALSE}
+knitr::include_graphics("C:/Users/andre/Desktop/project_template/extra/count-of name-by-sex-and-survived.png")
+```
+
+---
+We decided to start of very basic with our visualization
+
+So in this graph we have let the x-axis represent the Gender(Sex) of the different passengers and y-axis shows the count of passengers. 
+
+From this we can see Gender is divided into 2 separate bars(Blue and yellow). Here Blue bar helps to shows how many passengers were not lucky enough to survive the crash. We can then compare that to the Mustard bar represents the passengers who survived the crash. 
+
+From analyzing this data we can take some information away which infers that the count of female passengers who survived is far higher than the amount of male passengers who were able to survive. 
+
+This information has then led us to the conclusion that females during the titanic crash were given higher priority during evacuation of the ship in comparison to their male counter parts. 
+
+A reason this might of been, that traditionally women and children are commonly known to be saved before men, and given a greater priority. 
+
+This was because back in the day people believed that women were weaker and needed protection. However as we know now this is not always the case
+
+---
+
+## Exploring Class in Deeper Detail
+```{r out.width = "55%", echo=FALSE}
+knitr::include_graphics("C:/Users/andre/Desktop/project_template/extra/count-by-sex-and-class.png")
+```
+
+---
+
+In this example we set the x-axis so that is has the Pclass of the different passengers aboard the ship, y-axis shows the count of passengers. Again as we can see we have decided to split the Pclass into 2 separate bars(Blue and Yellow). 
+
+The blue bar this time shows how many passengers were not lucky enough to survive the crash compared to the yellow bar which represents the passengers who did manage to survive the crash. 
+
+It can be seen the ratio of Class A and Class B passengers who survived is higher in comparison to the amount of passengers in the Class C who can survive. 
+
+The main conclusion of why we thought this was that the evacuation of the passengers could of been done based on the class of the passengers. 
+
+However to be sure we did further research and it was also discovered that the cabins with better class where stronger in design and also located closer to emergency life boats. 
+
+These two factors combined with the original point of people with better class getting evacuated first can help explain why if you had higher class status the chances of survival were higher.
+
+---
+
+## Does Age Play a Role? 
+```{r out.width = "55%", echo=FALSE}
+knitr::include_graphics("C:/Users/andre/Desktop/project_template/extra/average-age-survival-rate-male-female.webp")
+```
+
+---
+
+Blue region shows passengers that didn’t survive the crash.
+
+Yellow region shows passengers that survived. Graph has 2 different stacks based on gender and whether or not they survived. 
+
+This let us evaluate the average age of the surviving passengers to see if that effected the overall outcome or not.
+
+We can see the average age of a Male survived is 27.28 whereas average age of Female survived is 28.05, that’s interesting as it suggests mid aged females were given preference and young males were given preference. 
+
+Also, survival rate of female is quiet high(223) as compared to male(109). The possibility of children could effect these results as well, as you would presume they would be given some sort of priority when evacuating the titanic. 
+
+However, after further investigation a lot of children did unfortunately die in the titanic incident due the suaver cold conditions. The amount died is similar to the survival rate. This means they don't mess up the results in a direct comparison to one another.
+
+---
+
+#Predictors: Class, sex and age
+
+```{r eval=TRUE, echo=FALSE}
+# change eval=FALSE to eval=TRUE
+
+library(readr)
+titanic <- read_csv("C:/Users/andre/Desktop/project_template/data/presentation_files/Datasets/titanic.csv")
+
+titanic_survive_1 <- titanic %>%
+  select(Survived, Pclass, Sex, Age) %>%
+  mutate(Survived = as.factor(Survived)) %>%
+  drop_na()
+
+set.seed(1234)
+titanic_split <- initial_split(titanic_survive_1)
+titanic_train <- training(titanic_split)
+titanic_test  <- testing(titanic_split)
+
+titanic_rec_1 <- recipe(Survived ~ Pclass+Sex+Age, data = titanic_survive_1) %>%
+  step_dummy(all_nominal(), -all_outcomes())
+
+titanic_spec_1 <- logistic_reg() %>%
+  set_engine("glm")
+
+titanic_wflow_1 <- workflow() %>%
+  add_model(titanic_spec_1) %>%
+  add_recipe(titanic_rec_1)
+
+titanic_fit_1 <- titanic_wflow_1 %>%
+  fit(titanic_train)
+
+titanic_test_pred_1 <- predict(titanic_fit_1, new_data = titanic_test, type = "prob") %>%
+  bind_cols(titanic_test %>% select(Survived))
+
+titanic_test_pred_1 %>%
+  roc_curve(truth = Survived, .pred_1, event_level = "second") %>%
+  autoplot()
+```
+
+---
+
+#Predictors: class and sex
+
+```{r out.width = "55%", echo=FALSE}
+titanic_rec_2 <- recipe(Survived ~ Pclass + Sex, data = titanic_train) %>%
+  step_dummy(all_nominal(), -all_outcomes())
+
+titanic_wflow_2 <- workflow() %>%
+  add_model(titanic_spec_1) %>%
+  add_recipe(titanic_rec_2)
+
+titanic_fit_2 <- titanic_wflow_2 %>%
+  fit(titanic_train)
+
+titanic_test_pred_2 <- predict(titanic_fit_2, new_data = titanic_test, type = "prob") %>%
+  bind_cols(titanic_test %>% select(Survived))
+
+titanic_test_pred_2 %>%
+  roc_curve(truth = Survived, .pred_1, event_level = "second") %>%
+  autoplot()
+
+```
+
+---
+
+#Predictors: class and age
+
+```{r out.width = "55%", echo=FALSE}
+titanic_rec_3 <- recipe(Survived ~ Pclass + Age, data = titanic_train) %>%
+  step_dummy(all_nominal(), -all_outcomes())
+
+titanic_wflow_3 <- workflow() %>%
+  add_model(titanic_spec_1) %>%
+  add_recipe(titanic_rec_3)
+
+titanic_fit_3 <- titanic_wflow_3 %>%
+  fit(titanic_train)
+
+titanic_test_pred_3 <- predict(titanic_fit_3, new_data = titanic_test, type = "prob") %>%
+  bind_cols(titanic_test %>% select(Survived))
+
+titanic_test_pred_3 %>%
+  roc_curve(truth = Survived, .pred_1, event_level = "second") %>%
+  autoplot()
+```
+---
+
+#number of passengers from different classes at different ports of embankment: 
+
+```{r, echo=FALSE}
+titanic_2 <- table(titanic$Survived, titanic$Embarked)
+titanic_2
+titanic_3 <- table(titanic$Embarked, titanic$Pclass)
+titanic_3
+```
+---
+
+Limitations:
+
+Of the 891 passengers in this dataset, 714 of them have an age, meaning 177 don't. That’s nearly 20% of passengers with no data on their age. The lack of data in this variable has an effect on the reliability of the results of graphs using age as a dependent variable. 
+
+This could be due to the failure to write down the age of passengers from different classes when they boarded the titanic or the passengers just simply not knowing. 
+
+This has an effect on the results as we excluded passengers with an unknown age from any of the tables. Therefore the median age of the passengers who survived and survival rates comping with other variables calculated are affected.
+---
+
+#Conclusion
+
+To conclude there was a total of 342 passengers that were lucky enough to survive the accident totaling to only 31.2% of people surviving the crash. 
+
+From gathering all the information we could see that statically if you were a first class female you had the greatest percentage of chance of surviving. This was because after using a predictor and exploring the data 97.2% of first class women survived the crash.
+
+However on the flip side men in the third class where the less likely to survive. After evaluating the data we found that only 13.3% of third class males survived the crash.
 
