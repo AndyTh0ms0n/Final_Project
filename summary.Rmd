@@ -56,8 +56,6 @@ my_data
 
 ---
 
----
-
 ```{r}
 my_data %>%
   summarise(median_fare = median(Fare, na.rm = TRUE))
@@ -165,7 +163,7 @@ This statistic therefore allows us to determine that first class passengers had 
 ## One of our Findings
 
 ```{r out.width = "50%", echo=FALSE}
-knitr::include_graphics("C:/Users/andre/Desktop/project_template/extra/count-of name-by-sex-and-survived.png")
+knitr::include_graphics("C:/Users/andre/Desktop/Final_Project/extra/count-of name-by-sex-and-survived.png")
 ```
 
 ---
@@ -187,7 +185,7 @@ This was because back in the day people believed that women were weaker and need
 
 ## Exploring Class in Deeper Detail
 ```{r out.width = "55%", echo=FALSE}
-knitr::include_graphics("C:/Users/andre/Desktop/project_template/extra/count-by-sex-and-class.png")
+knitr::include_graphics("C:/Users/andre/Desktop/Final_Project/extra/count-by-sex-and-class.png")
 ```
 
 ---
@@ -208,7 +206,7 @@ These two factors combined with the original point of people with better class g
 
 ## Does Age Play a Role? 
 ```{r out.width = "55%", echo=FALSE}
-knitr::include_graphics("C:/Users/andre/Desktop/project_template/extra/average-age-survival-rate-male-female.webp")
+knitr::include_graphics("C:/Users/andre/Desktop/Final_Project/extra/average-age-survival-rate-male-female.webp")
 ```
 
 ---
